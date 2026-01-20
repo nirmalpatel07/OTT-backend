@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  // url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  name     String   @map("name")
+  email    String @unique @map("email")
+  password String @map("password")
+  role     Int @default(1)  @map("role") //1: user, 2: admin
+  status   Boolean @default(true) @map("status")
+
+  profiles      Profile[] //Nirmal or guest or someone else
+  subscriptions Subscription[]
+
+  createdAt DateTime @default(now())
+}
+
+model Profile {
+  id     Int     @id @default(autoincrement()) @map("id")
+  name   String @map("name")
+  isKids Boolean @default(false) @map("is_kids")
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model Plan {
+  id            Int            @id @default(autoincrement())  @map("id")
+  name          String      @map("name")  
+  price         Float   @map("price")
+  duration      Int   @map("duration") // in days   
+  maxDevices    Int   @map("max_devices")
+  videoQuality  String @map("video_quality") //highest supported
+  subscriptions Subscription[]
+
+  createdAt DateTime @default(now())
+}
+
+model Subscription {
+  id        Int      @id @default(autoincrement())  @map("id")
+  startDate DateTime  @map("start_date")
+  endDate   DateTime  @map("end_date")
+  isActive  Boolean  @default(true) @map("is_active")
+
+  userId Int
+  planId Int
+
+  user User @relation(fields: [userId], references: [id])
+  plan Plan @relation(fields: [planId], references: [id])
+
+  createdAt DateTime @default(now())
+}
